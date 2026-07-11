@@ -56,7 +56,14 @@ export default function InvoicePreview({ invoice }: Props) {
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: '10px 4px' }}>{item.description}</td>
+              <td style={{ padding: '10px 4px' }}>
+                {item.description}
+                {item.make && (
+                  <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>
+                    MAKE: {item.make}
+                  </div>
+                )}
+              </td>
               <td style={{ textAlign: 'center', padding: '10px 4px' }}>{item.quantity}</td>
               <td style={{ textAlign: 'right', padding: '10px 4px' }}>{fmt(item.unitPrice)}</td>
               <td style={{ textAlign: 'right', padding: '10px 4px', fontWeight: 600 }}>{fmt(item.total)}</td>
