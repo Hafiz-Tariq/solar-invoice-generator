@@ -28,7 +28,10 @@ const DEFAULT_AH = ['100Ah', '120Ah', '150Ah', '180Ah', '200Ah', '220Ah', '250Ah
 const DEFAULT_MM2 = ['2.5mm²', '4mm²', '6mm²', '10mm²', '7/.056', '7/.064', '7/.074']
 const DEFAULT_PANEL = ['1-Panel', '2-Panel', '3-Panel', '4-Panel', '6-Panel', '8-Panel', '10-Panel', '12-Panel']
 const DEFAULT_A = ['16A', '20A', '25A', '32A', '40A', '50A', '63A', '100A', '125A', '160A', '200A', '250A']
-const DEFAULT_MAKES = ['JA Solar', 'Longi', 'Trina Solar', 'Canadian Solar', 'Jinko Solar', 'Yingli', 'Risen Energy', 'Talesun', 'Huasun', 'TW Solar']
+const DEFAULT_MAKES_SOLAR = ['JA Solar', 'Longi', 'Trina Solar', 'Canadian Solar', 'Jinko Solar', 'Yingli', 'Risen Energy', 'Talesun', 'Huasun', 'TW Solar']
+const DEFAULT_MAKES_BATTERY = ['Phoenix', 'Exide', 'Osaka', 'Daewoo', 'HOPPECKE', 'AGS', 'Reon Energy', 'Tesla']
+const DEFAULT_MAKES_INVERTER = ['Inverex', 'Axpert', 'Sofar Solar', 'Sungrow', 'Growatt', 'Deye', 'Huawei', 'Goodwe']
+const DEFAULT_MAKES_WIRING = ['Pakistan Cables', 'Al-Ghazi', 'Fast Cables', 'Newage Cables', 'Atlas Cables', 'KPK Cables']
 
 function hasWattageOptions(desc: string) {
   return desc === 'Solar Panel MONO-facial' || desc === 'Solar Panel BI-facial'
@@ -42,6 +45,18 @@ function hasWattageOptions(desc: string) {
 
 function isSolarPanelDesc(desc: string) {
   return desc === 'Solar Panel MONO-facial' || desc === 'Solar Panel BI-facial'
+}
+
+function isBatteryDesc(desc: string) {
+  return desc === 'Battery Lithium' || desc === 'Battery Tubular' || desc === 'Battery Gel' || desc === 'Battery AGM'
+}
+
+function isInverterDesc(desc: string) {
+  return desc === 'VFD' || desc === 'Inverter'
+}
+
+function hasMakeOptions(desc: string) {
+  return isSolarPanelDesc(desc) || isInverterDesc(desc) || isBatteryDesc(desc) || desc === 'Wiring'
 }
 
 function getUnit(desc: string): string {
@@ -111,7 +126,10 @@ export default function InvoiceForm({
   const [mm2Options, setMm2Options] = useState<string[]>([...DEFAULT_MM2])
   const [panelOptions, setPanelOptions] = useState<string[]>([...DEFAULT_PANEL])
   const [aOptions, setAOptions] = useState<string[]>([...DEFAULT_A])
-  const [makeOptions, setMakeOptions] = useState<string[]>([...DEFAULT_MAKES])
+  const [makeSolarOptions, setMakeSolarOptions] = useState<string[]>([...DEFAULT_MAKES_SOLAR])
+  const [makeBatteryOptions, setMakeBatteryOptions] = useState<string[]>([...DEFAULT_MAKES_BATTERY])
+  const [makeInverterOptions, setMakeInverterOptions] = useState<string[]>([...DEFAULT_MAKES_INVERTER])
+  const [makeWiringOptions, setMakeWiringOptions] = useState<string[]>([...DEFAULT_MAKES_WIRING])
   const [wattageMap, setWattageMap] = useState<Record<number, string>>({})
   const [addingWattage, setAddingWattage] = useState<Record<number, boolean>>({})
   const [newWattageInput, setNewWattageInput] = useState<Record<number, string>>({})
@@ -129,6 +147,14 @@ export default function InvoiceForm({
     return [wattageOptions, setWattageOptions] as const
   }
 
+  function getMakeList(desc: string) {
+    if (isSolarPanelDesc(desc)) return [makeSolarOptions, setMakeSolarOptions] as const
+    if (isInverterDesc(desc)) return [makeInverterOptions, setMakeInverterOptions] as const
+    if (isBatteryDesc(desc)) return [makeBatteryOptions, setMakeBatteryOptions] as const
+    if (desc === 'Wiring') return [makeWiringOptions, setMakeWiringOptions] as const
+    return null
+  }
+
   const updateItem = (idx: number, field: keyof InvoiceItem, val: string) => {
     const next = [...items]
     const parsed = parseNumber(val)
@@ -141,6 +167,11 @@ export default function InvoiceForm({
         setAddingWattage((prev) => { const c = { ...prev }; delete c[idx]; return c })
         setNewWattageInput((prev) => { const c = { ...prev }; delete c[idx]; return c })
         next[idx] = { ...next[idx], description: val }
+      }
+      if (!hasMakeOptions(val)) {
+        next[idx] = { ...next[idx], make: undefined }
+        setAddingMake((prev) => { const c = { ...prev }; delete c[idx]; return c })
+        setNewMakeInput((prev) => { const c = { ...prev }; delete c[idx]; return c })
       }
     } else if (field === 'quantity') {
       next[idx] = { ...next[idx], quantity: Math.max(1, parsed), total: Math.max(1, parsed) * next[idx].unitPrice }
@@ -205,14 +236,19 @@ export default function InvoiceForm({
   }
 
   const confirmAddMake = (idx: number, val: string) => {
+    const desc = items[idx].description.replace(suffixRe, '')
     const cleaned = val.trim()
     if (!cleaned) {
       setAddingMake((prev) => ({ ...prev, [idx]: false }))
       setNewMakeInput((prev) => { const c = { ...prev }; delete c[idx]; return c })
       return
     }
-    if (!makeOptions.includes(cleaned)) {
-      setMakeOptions((prev) => [...prev, cleaned].sort())
+    const makeList = getMakeList(desc)
+    if (makeList) {
+      const [list, setList] = makeList
+      if (!list.includes(cleaned)) {
+        setList((prev) => [...prev, cleaned].sort((a, b) => a.localeCompare(b)))
+      }
     }
     setAddingMake((prev) => ({ ...prev, [idx]: false }))
     setNewMakeInput((prev) => { const c = { ...prev }; delete c[idx]; return c })
@@ -222,7 +258,12 @@ export default function InvoiceForm({
   }
 
   const removeMake = (idx: number, make: string) => {
-    setMakeOptions((prev) => prev.filter((m) => m !== make))
+    const desc = items[idx].description.replace(suffixRe, '')
+    const makeList = getMakeList(desc)
+    if (makeList) {
+      const [, setList] = makeList
+      setList((prev) => prev.filter((m) => m !== make))
+    }
     if (items[idx].make === make) {
       const next = [...items]
       next[idx] = { ...next[idx], make: undefined }
@@ -378,107 +419,92 @@ export default function InvoiceForm({
               flexWrap: 'wrap',
             }}
           >
-            <select
-              disabled={!wattageActive(idx)}
-              value={
-                addingWattage[idx]
-                  ? 'Add more...'
-                  : wattageMap[idx] && items[idx].description.includes(wattageMap[idx])
-                    ? wattageMap[idx]
-                    : ''
-              }
-              onChange={(e) => handleWattageChange(idx, e.target.value)}
-              style={{
-                ...inputStyle,
-                width: 130,
-                opacity: wattageActive(idx) ? 1 : 0.4,
-                cursor: wattageActive(idx) ? 'pointer' : 'not-allowed',
-                appearance: 'auto',
-              }}
-            >
-              <option value="" disabled>Select</option>
-              {getOptions(items[idx].description.replace(suffixRe, ''))[0].map((w) => (
-                <option key={w} value={w}>{w}</option>
-              ))}
-              <option value="Add more...">+ Add more...</option>
-            </select>
-            {wattageMap[idx] && !addingWattage[idx] && (
-              <span
-                onClick={() => removeWattage(idx, wattageMap[idx])}
-                style={{
-                  fontSize: 11,
-                  color: '#e74c3c',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-                title="Remove this rating"
-              >
-                (× remove)
-              </span>
-            )}
-            {addingWattage[idx] && (
-              <input
-                style={{ ...inputStyle, width: 100 }}
-                placeholder={placeholderText(items[idx].description.replace(suffixRe, ''))}
-                value={(newWattageInput[idx] || '').replace(/[^0-9./]/g, '')}
-                onChange={(e) => setNewWattageInput((prev) => ({ ...prev, [idx]: e.target.value.replace(/[^0-9./]/g, '') }))}
-                onBlur={(e) => confirmAddWattage(idx, e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') confirmAddWattage(idx, (e.target as HTMLInputElement).value)
-                }}
-                autoFocus
-              />
-            )}
-            {isSolarPanelDesc(items[idx].description.replace(suffixRe, '')) && (
+            {wattageActive(idx) && (
               <>
                 <select
-                  disabled={!wattageActive(idx)}
-                  value={addingMake[idx] ? 'Add more...' : items[idx].make || ''}
-                  onChange={(e) => handleMakeChange(idx, e.target.value)}
-                  style={{
-                    ...inputStyle,
-                    width: 140,
-                    opacity: wattageActive(idx) ? 1 : 0.4,
-                    cursor: wattageActive(idx) ? 'pointer' : 'not-allowed',
-                    appearance: 'auto',
-                    marginLeft: 4,
-                  }}
+                  value={
+                    addingWattage[idx]
+                      ? 'Add more...'
+                      : wattageMap[idx] && items[idx].description.includes(wattageMap[idx])
+                        ? wattageMap[idx]
+                        : ''
+                  }
+                  onChange={(e) => handleWattageChange(idx, e.target.value)}
+                  style={{ ...inputStyle, width: 130, appearance: 'auto' }}
                 >
-                  <option value="" disabled>Select make</option>
-                  {makeOptions.map((m) => (
-                    <option key={m} value={m}>{m}</option>
+                  <option value="" disabled>Select</option>
+                  {getOptions(items[idx].description.replace(suffixRe, ''))[0].map((w) => (
+                    <option key={w} value={w}>{w}</option>
                   ))}
                   <option value="Add more...">+ Add more...</option>
                 </select>
-                {items[idx].make && !addingMake[idx] && (
+                {wattageMap[idx] && !addingWattage[idx] && (
                   <span
-                    onClick={() => removeMake(idx, items[idx].make!)}
-                    style={{
-                      fontSize: 11,
-                      color: '#e74c3c',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                    }}
-                    title="Remove this make"
+                    onClick={() => removeWattage(idx, wattageMap[idx])}
+                    style={{ fontSize: 11, color: '#e74c3c', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    title="Remove this rating"
                   >
                     (× remove)
                   </span>
                 )}
-                {addingMake[idx] && (
+                {addingWattage[idx] && (
                   <input
-                    style={{ ...inputStyle, width: 120 }}
-                    placeholder="e.g. Brand name"
-                    value={newMakeInput[idx] || ''}
-                    onChange={(e) => setNewMakeInput((prev) => ({ ...prev, [idx]: e.target.value }))}
-                    onBlur={(e) => confirmAddMake(idx, e.target.value)}
+                    style={{ ...inputStyle, width: 100 }}
+                    placeholder={placeholderText(items[idx].description.replace(suffixRe, ''))}
+                    value={(newWattageInput[idx] || '').replace(/[^0-9./]/g, '')}
+                    onChange={(e) => setNewWattageInput((prev) => ({ ...prev, [idx]: e.target.value.replace(/[^0-9./]/g, '') }))}
+                    onBlur={(e) => confirmAddWattage(idx, e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') confirmAddMake(idx, (e.target as HTMLInputElement).value)
+                      if (e.key === 'Enter') confirmAddWattage(idx, (e.target as HTMLInputElement).value)
                     }}
                     autoFocus
                   />
                 )}
               </>
             )}
+            {(() => {
+              const desc = items[idx].description.replace(suffixRe, '')
+              const makeList = getMakeList(desc)
+              if (!makeList) return null
+              const [list] = makeList
+              return (
+                <>
+                  <select
+                    value={addingMake[idx] ? 'Add more...' : items[idx].make || ''}
+                    onChange={(e) => handleMakeChange(idx, e.target.value)}
+                    style={{ ...inputStyle, width: 140, appearance: 'auto' }}
+                  >
+                    <option value="" disabled>Select make</option>
+                    {list.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                    <option value="Add more...">+ Add more...</option>
+                  </select>
+                  {items[idx].make && !addingMake[idx] && (
+                    <span
+                      onClick={() => removeMake(idx, items[idx].make!)}
+                      style={{ fontSize: 11, color: '#e74c3c', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                      title="Remove this make"
+                    >
+                      (× remove)
+                    </span>
+                  )}
+                  {addingMake[idx] && (
+                    <input
+                      style={{ ...inputStyle, width: 120 }}
+                      placeholder="e.g. Brand name"
+                      value={newMakeInput[idx] || ''}
+                      onChange={(e) => setNewMakeInput((prev) => ({ ...prev, [idx]: e.target.value }))}
+                      onBlur={(e) => confirmAddMake(idx, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') confirmAddMake(idx, (e.target as HTMLInputElement).value)
+                      }}
+                      autoFocus
+                    />
+                  )}
+                </>
+              )
+            })()}
           </div>
         </div>
       ))}
