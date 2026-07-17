@@ -20,11 +20,45 @@ body {
   flex-direction: column;
 }
 
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .app-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media print {
   body {
     background: #fff;
   }
   .no-print {
     display: none !important;
+  }
+  .app-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .app-grid > *:first-child {
+    display: none !important;
+  }
+  .invoice-preview {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+  table {
+    page-break-inside: auto;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tr {
+    page-break-inside: avoid;
   }
 }

@@ -84,6 +84,8 @@ interface Props {
   setItems: (v: InvoiceItem[]) => void
   discount: number
   setDiscount: (v: number) => void
+  subtotal: number
+  grandTotal: number
   invoiceNumber: string
   setInvoiceNumber: (v: string) => void
   invoiceDate: string
@@ -113,6 +115,8 @@ export default function InvoiceForm({
   setItems,
   discount,
   setDiscount,
+  subtotal,
+  grandTotal,
   invoiceNumber,
   setInvoiceNumber,
   invoiceDate,
@@ -523,6 +527,36 @@ export default function InvoiceForm({
             value={discount}
             onChange={(e) => setDiscount(Math.max(0, Number(e.target.value)))}
           />
+        </div>
+        <div>
+          <div style={{
+            background: '#f8f9fa',
+            borderRadius: 8,
+            padding: '12px 16px',
+            fontSize: 13,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: '#555' }}>Subtotal</span>
+              <span>PKR {subtotal.toLocaleString()}</span>
+            </div>
+            {discount > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ color: '#555' }}>Discount</span>
+                <span style={{ color: '#e74c3c' }}>-PKR {discount.toLocaleString()}</span>
+              </div>
+            )}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              borderTop: '2px solid #1a1a2e',
+              paddingTop: 6,
+              fontWeight: 700,
+              fontSize: 15,
+            }}>
+              <span>Grand Total</span>
+              <span>PKR {grandTotal.toLocaleString()}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

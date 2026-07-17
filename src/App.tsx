@@ -137,14 +137,7 @@ export default function App() {
         </p>
       </header>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 24,
-          alignItems: 'start',
-        }}
-      >
+      <div className="app-grid">
         <InvoiceForm
           customerName={customerName}
           setCustomerName={setCustomerName}
@@ -158,6 +151,8 @@ export default function App() {
           setItems={setItems}
           discount={discount}
           setDiscount={setDiscount}
+          subtotal={subtotal}
+          grandTotal={grandTotal}
           invoiceNumber={invoiceNumber}
           setInvoiceNumber={setInvoiceNumber}
           invoiceDate={invoiceDate}
