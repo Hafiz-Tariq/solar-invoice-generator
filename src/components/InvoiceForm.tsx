@@ -30,7 +30,7 @@ const DEFAULT_PANEL = ['1-Panel', '2-Panel', '3-Panel', '4-Panel', '6-Panel', '8
 const DEFAULT_A = ['16A', '20A', '25A', '32A', '40A', '50A', '63A', '100A', '125A', '160A', '200A', '250A']
 const DEFAULT_MAKES_SOLAR = ['JA Solar', 'Longi', 'Trina Solar', 'Canadian Solar', 'Jinko Solar', 'Yingli', 'Risen Energy', 'Talesun', 'Huasun', 'TW Solar']
 const DEFAULT_MAKES_BATTERY = ['Phoenix', 'Exide', 'Osaka', 'Daewoo', 'HOPPECKE', 'AGS', 'Reon Energy', 'Tesla']
-const DEFAULT_MAKES_INVERTER = ['Inverex', 'Axpert', 'Deye', 'Sofar Solar', 'Sungrow', 'Growatt', 'Huawei', 'Goodwe', 'Solis', 'ABB', 'Delta', 'Schneider']
+const DEFAULT_MAKES_INVERTER = ['invt', 'Invent', 'Fronus', 'Solis', 'Inverex', 'Goodwe', 'Huawei', 'Axpert', 'Deye']
 const DEFAULT_MAKES_WIRING = ['Single Core Copper', 'Single Core Silver', 'Double Core Copper', 'Double Core Silver', 'Three Core Copper', 'Three Core Silver']
 
 function hasWattageOptions(desc: string) {
