@@ -6,7 +6,7 @@ React + Vite + TypeScript app for generating solar installation invoices with PD
 
 | Action | Command |
 |--------|---------|
-| Dev server | `npm run dev` |
+| Dev server | `npm run dev` (use `Start-Process` to launch in background — never block the shell waiting for it) |
 | Build | `npm run build` (tsc `-b` must run _before_ vite build — both in one script) |
 | Preview build | `npm run preview` |
 

@@ -31,7 +31,7 @@ const DEFAULT_A = ['16A', '20A', '25A', '32A', '40A', '50A', '63A', '100A', '125
 const DEFAULT_MAKES_SOLAR = ['JA Solar', 'Longi', 'Trina Solar', 'Canadian Solar', 'Jinko Solar', 'Yingli', 'Risen Energy', 'Talesun', 'Huasun', 'TW Solar']
 const DEFAULT_MAKES_BATTERY = ['Phoenix', 'Exide', 'Osaka', 'Daewoo', 'HOPPECKE', 'AGS', 'Reon Energy', 'Tesla']
 const DEFAULT_MAKES_INVERTER = ['Inverex', 'Axpert', 'Sofar Solar', 'Sungrow', 'Growatt', 'Deye', 'Huawei', 'Goodwe']
-const DEFAULT_MAKES_WIRING = ['Pakistan Cables', 'Al-Ghazi', 'Fast Cables', 'Newage Cables', 'Atlas Cables', 'KPK Cables']
+const DEFAULT_MAKES_WIRING = ['Single Core Copper', 'Single Core Silver', 'Double Core Copper', 'Double Core Silver', 'Three Core Copper', 'Three Core Silver']
 
 function hasWattageOptions(desc: string) {
   return desc === 'Solar Panel MONO-facial' || desc === 'Solar Panel BI-facial'

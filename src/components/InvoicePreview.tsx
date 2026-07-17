@@ -67,7 +67,7 @@ export default function InvoicePreview({ invoice }: Props) {
                 {item.description}
                 {item.make && (
                   <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>
-                    MAKE: {item.make}
+                    {item.make}
                   </div>
                 )}
               </td>
