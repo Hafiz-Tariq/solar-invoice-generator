@@ -1,9 +1,12 @@
+import type { AppData } from './types'
+
+const STORAGE_KEY = 'solar-invoice-data'
+
 export function numberToWords(n: number): string {
   if (n === 0) return 'Zero'
   const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
     'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']
   const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
-
   const convert = (num: number): string => {
     if (num < 20) return ones[num]
     if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? ' ' + ones[num % 10] : '')
@@ -12,6 +15,21 @@ export function numberToWords(n: number): string {
     if (num < 10000000) return convert(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 ? ' ' + convert(num % 100000) : '')
     return convert(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 ? ' ' + convert(num % 10000000) : '')
   }
-
   return convert(Math.floor(n))
+}
+
+export function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+}
+
+export function loadAppData(): AppData {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch { /* ignore */ }
+  return { customers: [], invoices: [], payments: [] }
+}
+
+export function saveAppData(data: AppData): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
 }

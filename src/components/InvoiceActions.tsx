@@ -2,6 +2,8 @@ interface Props {
   onPrint: () => void
   onPdf: () => void
   onWhatsApp: () => void
+  onSaveInvoice: () => void
+  customerName: string
 }
 
 const btnBase: React.CSSProperties = {
@@ -16,7 +18,7 @@ const btnBase: React.CSSProperties = {
   cursor: 'pointer',
 }
 
-export default function InvoiceActions({ onPrint, onPdf, onWhatsApp }: Props) {
+export default function InvoiceActions({ onPrint, onPdf, onWhatsApp, onSaveInvoice, customerName }: Props) {
   return (
     <div
       className="no-print"
@@ -27,6 +29,14 @@ export default function InvoiceActions({ onPrint, onPdf, onWhatsApp }: Props) {
         flexWrap: 'wrap',
       }}
     >
+      <button
+        onClick={onSaveInvoice}
+        style={{ ...btnBase, background: '#1a1a2e', color: '#fff' }}
+        disabled={!customerName.trim()}
+        title={!customerName.trim() ? 'Enter customer name first' : ''}
+      >
+        Save Invoice
+      </button>
       <button
         onClick={onPdf}
         style={{ ...btnBase, background: '#e74c3c', color: '#fff' }}

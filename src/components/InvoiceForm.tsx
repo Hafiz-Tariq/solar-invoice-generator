@@ -91,6 +91,7 @@ interface Props {
   invoiceDate: string
   setInvoiceDate: (v: string) => void
   generateInvoiceNumber: () => void
+  existingCustomerNames: string[]
 }
 
 function formatNumber(n: number): string {
@@ -122,6 +123,7 @@ export default function InvoiceForm({
   invoiceDate,
   setInvoiceDate,
   generateInvoiceNumber,
+  existingCustomerNames,
 }: Props) {
   const [wattageOptions, setWattageOptions] = useState<string[]>([...DEFAULT_WATTAGES])
   const [kwOptions, setKwOptions] = useState<string[]>([...DEFAULT_KW])
@@ -339,7 +341,12 @@ export default function InvoiceForm({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
         <div style={{ gridColumn: '1 / -1' }}>
           <label style={labelStyle}>Full Name</label>
-          <input style={inputStyle} value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+          <input style={inputStyle} list="customer-names" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+          <datalist id="customer-names">
+            {existingCustomerNames.map((n) => (
+              <option key={n} value={n} />
+            ))}
+          </datalist>
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
           <label style={labelStyle}>Address</label>

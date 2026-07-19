@@ -15,12 +15,22 @@ React + Vite + TypeScript app for generating solar installation invoices with PD
 - **`src/App.tsx`** — all state is lifted here (no form library; plain `useState`). Handlers for PDF, print, and WhatsApp live here too.
 - **`src/components/InvoiceForm.tsx`** — receives state + setters as props from App. Contains all item spec dropdown logic.
 - **`src/components/InvoicePreview.tsx`** — read-only render of `InvoiceData`. This is the print/PDF target.
-- **`src/components/InvoiceActions.tsx`** — three buttons wired to handlers in App.
-- **`src/types.ts`** — `InvoiceData` and `InvoiceItem` interfaces.
+- **`src/components/InvoiceActions.tsx`** — four buttons (Save Invoice + PDF + Print + WhatsApp) wired to handlers in App.
+- **`src/components/CustomerDashboard.tsx`** — lists all customers with outstanding balance. Entry point for navigation.
+- **`src/components/CustomerHistory.tsx`** — per-customer chronological view of invoices + payments with running balance and "Record Payment" buttons on each invoice card.
+- **`src/components/PaymentForm.tsx`** — modal to record payments (optionally tied to a specific invoice).
+- **`src/components/AddCustomerModal.tsx`** — modal for adding a new customer.
+- **`src/types.ts`** — `InvoiceData`, `InvoiceItem`, plus `StoredCustomer`, `StoredInvoice`, `StoredPayment`, `AppView`, `AppData`.
+- **`src/utils.ts`** — `numberToWords`, `generateId`, `loadAppData`, `saveAppData`.
 
 ## Non-obvious details
 
-- **Default items**: 5 pre-filled line items are hardcoded in `App.tsx:7-38`. Agents should check this when adding/removing fields.
+- **Default items**: 5 pre-filled line items are hardcoded in `App.tsx`. Agents should check this when adding/removing fields.
+- **Customer history & payments**: All data persisted to `localStorage` under key `solar-invoice-data`. Loaded on boot, saved on every mutation via `useEffect`.
+- **View routing**: Simple state-based routing via `AppView` union type — no router library. Three views: `dashboard`, `invoice`, `history`.
+- **Payment flow**: Each invoice card in CustomerHistory shows a "Record Payment" button (when not fully paid). General "Record Payment" button also available at the top. Payments optionally tied to invoices — invoice's `paidAmount` is updated accordingly.
+- **Balance calculation**: `customer balance = sum(invoice.grandTotal) - sum(payment.amount)` across all invoices/payments for that customer.
+- **Customer auto-complete**: InvoiceForm customer name input uses `<datalist>` populated from existing customer names.
 - **PDF**: `html2canvas` + `jsPDF` (dynamic `import()` on button click, not eager). Captures the preview div only, not the full page.
 - **Print**: `window.print()` — elements with `className="no-print"` are hidden via `index.css` print media query.
 - **WhatsApp**: generates a plain-text summary and opens `wa.me` link — does NOT share the PDF or image.
