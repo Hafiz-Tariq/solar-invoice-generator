@@ -27,7 +27,9 @@ export function loadAppData(): AppData {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
-      if (parsed.customers?.length || parsed.invoices?.length) return parsed
+      if (parsed.customers?.length || parsed.invoices?.length) {
+        if (parsed._seedVersion === 1) return parsed
+      }
     }
   } catch { /* ignore */ }
 
@@ -105,7 +107,7 @@ export function loadAppData(): AppData {
     { id: 'p6', customerId: 'c5', invoiceId: 'inv5', date: '2026-06-15', amount: 1000000, note: 'Bank transfer — HBL', createdAt: '2026-06-15T12:00:00Z' },
   ]
 
-  return { customers, invoices, payments }
+  return { customers, invoices, payments, _seedVersion: 1 } as AppData
 }
 
 export function saveAppData(data: AppData): void {
