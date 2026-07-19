@@ -25,7 +25,10 @@ export function generateId(): string {
 export function loadAppData(): AppData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed.customers?.length || parsed.invoices?.length) return parsed
+    }
   } catch { /* ignore */ }
 
   const customers = [
