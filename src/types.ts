@@ -63,3 +63,4 @@ export type AppView =
   | { name: 'dashboard' }
   | { name: 'invoice'; customerId?: string }
   | { name: 'history'; customerId: string }
+  | { name: 'saved-invoice'; invoiceId: string; customerId: string }

@@ -1,17 +1,20 @@
-import type { InvoiceData } from '../types'
+import type { InvoiceData, StoredPayment } from '../types'
 import { numberToWords } from '../utils'
 
 interface Props {
   invoice: InvoiceData
+  payments?: StoredPayment[]
 }
 
 function fmt(n: number): string {
   return `PKR ${n.toLocaleString()}`
 }
 
-export default function InvoicePreview({ invoice }: Props) {
+export default function InvoicePreview({ invoice, payments }: Props) {
   const { customer, items, subtotal, discount, grandTotal } = invoice
   const discountPct = subtotal > 0 ? Math.round((discount / subtotal) * 100) : 0
+  const totalPaid = payments?.reduce((s, p) => s + p.amount, 0) || 0
+  const remaining = grandTotal - totalPaid
 
   return (
     <div className="invoice-preview" style={{
@@ -79,6 +82,26 @@ export default function InvoicePreview({ invoice }: Props) {
         </tbody>
       </table>
 
+      {/* Payments section */}
+      {payments && payments.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <p style={{ fontWeight: 700, fontSize: 13, color: '#1a1a2e', marginBottom: 6 }}>Payments Received</p>
+          {payments.sort((a, b) => a.date.localeCompare(b.date)).map((p) => (
+            <div key={p.id} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '6px 10px', background: '#f0faf0', borderRadius: 6, marginBottom: 4,
+              fontSize: 12,
+            }}>
+              <div>
+                <span style={{ fontWeight: 600 }}>{p.date}</span>
+                {p.note && <span style={{ color: '#555', marginLeft: 8 }}>{p.note}</span>}
+              </div>
+              <span style={{ fontWeight: 700, color: '#27ae60' }}>-{fmt(p.amount)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div style={{ maxWidth: '50%' }}>
           <p style={{ fontSize: 12, color: '#555', fontStyle: 'italic' }}>
@@ -87,6 +110,12 @@ export default function InvoicePreview({ invoice }: Props) {
           <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a2e', marginTop: 4 }}>
             Rupees {numberToWords(grandTotal)} only
           </p>
+          {payments && totalPaid > 0 && (
+            <div style={{ marginTop: 8, fontSize: 12, color: '#555' }}>
+              <p>Paid: <span style={{ color: '#27ae60', fontWeight: 600 }}>{fmt(totalPaid)}</span></p>
+              {remaining > 0 && <p>Remaining: <span style={{ color: '#e74c3c', fontWeight: 600 }}>{fmt(remaining)}</span></p>}
+            </div>
+          )}
         </div>
         <div style={{ minWidth: 240 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>

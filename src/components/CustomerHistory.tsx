@@ -4,7 +4,7 @@ interface Props {
   customer: StoredCustomer
   invoices: StoredInvoice[]
   payments: StoredPayment[]
-  onRecordPayment: (invoiceId?: string) => void
+  onViewInvoice: (invoiceId: string) => void
   onBack: () => void
   onNewInvoice: () => void
 }
@@ -13,7 +13,7 @@ function fmt(n: number): string {
   return 'PKR ' + n.toLocaleString()
 }
 
-export default function CustomerHistory({ customer, invoices, payments, onRecordPayment, onBack, onNewInvoice }: Props) {
+export default function CustomerHistory({ customer, invoices, payments, onViewInvoice, onBack, onNewInvoice }: Props) {
   const customerInvoices = invoices.filter((i) => i.customerId === customer.id).sort((a, b) => b.date.localeCompare(a.date))
   const customerPayments = payments.filter((p) => p.customerId === customer.id).sort((a, b) => b.date.localeCompare(a.date))
 
@@ -60,15 +60,6 @@ export default function CustomerHistory({ customer, invoices, payments, onRecord
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         <button
-          onClick={() => onRecordPayment()}
-          style={{
-            background: '#3498db', color: '#fff', border: 'none', borderRadius: 6,
-            padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: 13,
-          }}
-        >
-          Record Payment
-        </button>
-        <button
           onClick={onNewInvoice}
           style={{
             background: '#27ae60', color: '#fff', border: 'none', borderRadius: 6,
@@ -93,9 +84,16 @@ export default function CustomerHistory({ customer, invoices, payments, onRecord
               const paidOnInvoice = invPayments.reduce((s, p) => s + p.amount, 0)
               const remaining = inv.grandTotal - paidOnInvoice
               return (
-                <div key={inv.id} style={{
-                  background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, marginBottom: 10, overflow: 'hidden',
-                }}>
+                <div
+                  key={inv.id}
+                  onClick={() => onViewInvoice(inv.id)}
+                  style={{
+                    background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, marginBottom: 10, overflow: 'hidden',
+                    cursor: 'pointer', transition: 'box-shadow 0.15s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'none')}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8f9fa' }}>
                     <div>
                       <span style={{ fontWeight: 600, fontSize: 14, color: '#1a1a2e' }}>{inv.invoiceNumber}</span>
@@ -115,19 +113,6 @@ export default function CustomerHistory({ customer, invoices, payments, onRecord
                           <span style={{ color: '#27ae60' }}>-{fmt(p.amount)}</span>
                         </div>
                       ))}
-                    </div>
-                  )}
-                  {remaining > 0 && (
-                    <div style={{ padding: '8px 16px', borderTop: '1px solid #f0f0f0', textAlign: 'right' }}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onRecordPayment(inv.id) }}
-                        style={{
-                          background: '#3498db', color: '#fff', border: 'none', borderRadius: 4,
-                          padding: '5px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 12,
-                        }}
-                      >
-                        Record Payment
-                      </button>
                     </div>
                   )}
                 </div>
